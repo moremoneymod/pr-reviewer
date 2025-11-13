@@ -1,0 +1,18 @@
+# Compiled binaries
+*.exe
+*.bin
+
+# Build directories
+/build/
+
+# Go module cache
+/pkg/
+
+# Editor/IDE specific files
+.vscode/
+.idea/
+*.swp
+
+# Temporary and log files
+*.log
+*.tmp
