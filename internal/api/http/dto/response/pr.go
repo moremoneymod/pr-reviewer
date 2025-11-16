@@ -1,4 +1,4 @@
-package request
+package response
 
 type PRResponse struct {
 	PullRequestID     string   `json:"pull_request_id"`
@@ -15,4 +15,9 @@ type PRShortResponse struct {
 	PullRequestName string `json:"pull_request_name"`
 	AuthorID        string `json:"author_id"`
 	Status          string `json:"status"`
+}
+
+type PRReassignResponse struct {
+	PullRequest PRResponse `json:"pr"`
+	ReplacedBy  string     `json:"replaced_by"`
 }

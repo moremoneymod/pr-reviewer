@@ -13,13 +13,13 @@ type PGConfig struct {
 	dsn string
 }
 
-func NewPGConfig() (*PGConfig, error) {
+func NewPGConfig() (PGConfig, error) {
 	dsn := os.Getenv(pgDSNEnvName)
 	if len(dsn) == 0 {
-		return nil, errors.New("pg dsn not found")
+		return PGConfig{}, errors.New("pg dsn not found")
 	}
 
-	return &PGConfig{
+	return PGConfig{
 		dsn: dsn,
 	}, nil
 }

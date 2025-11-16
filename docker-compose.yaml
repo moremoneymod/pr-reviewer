@@ -13,6 +13,27 @@ services:
     ports:
       - "${PG_PORT}:5432"
     volumes:
-      - postgres_volume:/var/lib/postresql/data
+      - postgres_volume:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${PG_USER}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
+  migrator:
+    build:
+      context: .
+      dockerfile: migration.Dockerfile
+    depends_on:
+      pg:
+        condition: service_healthy
 
+  pr-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pr-service
+    depends_on:
+      - migrator
+    ports:
+      - "8080:8080"

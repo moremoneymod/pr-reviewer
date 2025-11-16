@@ -1,4 +1,4 @@
-package request
+package response
 
 type TeamResponse struct {
 	TeamName string       `json:"team_name"`

@@ -10,8 +10,8 @@ import (
 const (
 	httpHostName        = "HTTP_HOST"
 	httpPortName        = "HTTP_PORT"
-	httpTimeoutName     = "HTTP_TIMEOUT"
-	httpIdleTimeoutName = "HTTP_IDLE_TIMEOUT"
+	httpTimeoutName     = "HTTP_TIMEOUT_SECONDS"
+	httpIdleTimeoutName = "HTTP_IDLE_TIMEOUT_SECONDS"
 )
 
 type HTTPConfig struct {
@@ -21,27 +21,27 @@ type HTTPConfig struct {
 	idleTimeout time.Duration
 }
 
-func NewHTTPConfig() (*HTTPConfig, error) {
+func NewHTTPConfig() (HTTPConfig, error) {
 	host := os.Getenv(httpHostName)
 	if len(host) == 0 {
-		return nil, errors.New("http host not found")
+		return HTTPConfig{}, errors.New("http host not found")
 	}
 	port := os.Getenv(httpPortName)
 	if len(port) == 0 {
-		return nil, errors.New("http port not found")
+		return HTTPConfig{}, errors.New("http port not found")
 	}
 
 	timeout, err := time.ParseDuration(os.Getenv(httpTimeoutName))
 	if err != nil {
-		return nil, err
+		return HTTPConfig{}, err
 	}
 
 	idleTimeout, err := time.ParseDuration(os.Getenv(httpIdleTimeoutName))
 	if err != nil {
-		return nil, err
+		return HTTPConfig{}, err
 	}
 
-	return &HTTPConfig{host, port, timeout, idleTimeout}, nil
+	return HTTPConfig{host, port, timeout, idleTimeout}, nil
 }
 
 func (cfg *HTTPConfig) Address() string {

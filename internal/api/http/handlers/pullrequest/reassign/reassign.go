@@ -1,0 +1,91 @@
+package reassign
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"log/slog"
+	"net/http"
+
+	"github.com/go-chi/render"
+	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/converter"
+	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/request"
+	errors2 "github.com/moremoneymod/pr-reviewer/internal/errors"
+	"github.com/moremoneymod/pr-reviewer/internal/lib/logger/sl"
+	"github.com/moremoneymod/pr-reviewer/internal/service"
+	serv "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+)
+
+type PRAssigner interface {
+	Reassign(ctx context.Context, prId string, oldUserId string) (*serv.PR, error)
+}
+
+func New(log *slog.Logger, prAssigner PRAssigner) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		const op = "internal.api.http.handlers.pullrequest.reassign.New"
+
+		log := log.With(
+			slog.String("op", op))
+
+		var req request.PRReassignRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			log.Error("error decoding body", sl.Err(err))
+
+			render.Status(r, http.StatusBadRequest)
+			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeBadRequest, "error decoding body"))
+
+			return
+		}
+
+		log = log.With(
+			slog.String("prId", req.PullRequestID))
+
+		reassignedPR, err := prAssigner.Reassign(r.Context(), req.PullRequestID, req.OldUserID)
+		if errors.Is(err, service.ErrPRNotFound) {
+			log.Warn("PR not found")
+			render.Status(r, http.StatusNotFound)
+			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeNotFound, "PR Not Found"))
+
+			return
+		}
+		if errors.Is(err, service.ErrUserNotFound) {
+			log.Warn("User not found")
+			render.Status(r, http.StatusNotFound)
+			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeNotFound, "User Not Found"))
+		}
+		if errors.Is(err, service.ErrPRMerged) {
+			log.Warn("PR merged")
+			render.Status(r, http.StatusConflict)
+			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodePRMerged, "PR merged"))
+
+			return
+		}
+		if errors.Is(err, service.ErrNoCandidates) {
+			log.Warn("no candidates")
+			render.Status(r, http.StatusConflict)
+			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeNoCandidate, "no candidates"))
+
+			return
+		}
+		if errors.Is(err, service.ErrUserNotReviewer) {
+			log.Warn("user not reviewer")
+			render.Status(r, http.StatusConflict)
+			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeNotAssigned, "user not reviewer"))
+
+			return
+		}
+		if err != nil {
+			log.Error("error reassigning PR", sl.Err(err))
+			render.Status(r, http.StatusInternalServerError)
+			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeInternalServer, "error reassigning PR"))
+			return
+		}
+
+		response := converter.ToPRDtoFromService(reassignedPR)
+
+		log.Info("pr reassigned successfully")
+		render.Status(r, http.StatusOK)
+		render.JSON(w, r, response)
+
+	}
+}
