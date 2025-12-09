@@ -1,6 +1,6 @@
 module github.com/moremoneymod/pr-reviewer
 
-go 1.24.3
+go 1.25.3
 
 require (
 	github.com/Masterminds/squirrel v1.5.4 // indirect

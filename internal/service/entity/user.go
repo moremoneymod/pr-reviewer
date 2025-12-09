@@ -3,7 +3,7 @@ package entity
 type User struct {
 	ID       string
 	Username string
-	TeamID   int
 	TeamName string
+	TeamID   int
 	IsActive bool
 }

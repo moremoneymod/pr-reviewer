@@ -10,13 +10,13 @@ const (
 )
 
 type PR struct {
+	CreatedAt *time.Time
+	MergedAt  *time.Time
 	ID        string
 	Name      string
 	AuthorID  string
-	Status    PRStatus
 	Reviewers []string
-	CreatedAt *time.Time
-	MergedAt  *time.Time
+	Status    PRStatus
 }
 type PRShort struct {
 	ID       string

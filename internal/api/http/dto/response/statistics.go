@@ -5,12 +5,12 @@ type StatisticsResponse struct {
 }
 
 type StatisticsData struct {
-	TotalPRs        int                 `json:"total_prs"`
-	OpenPRs         int                 `json:"open_prs"`
-	MergedPRs       int                 `json:"merged_prs"`
 	UserAssignments map[string]int      `json:"user_assignments"`
 	PRAssignments   map[string]int      `json:"pr_assignments"`
 	TeamStats       map[string]TeamStat `json:"team_stats"`
+	TotalPRs        int                 `json:"total_prs"`
+	OpenPRs         int                 `json:"open_prs"`
+	MergedPRs       int                 `json:"merged_prs"`
 }
 
 type TeamStat struct {

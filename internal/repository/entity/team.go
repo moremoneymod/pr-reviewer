@@ -3,16 +3,16 @@ package entity
 import "time"
 
 type Team struct {
-	ID        int       `db:"id"`
+	CreatedAt time.Time `db:"created_at"`
 	Name      string    `db:"name"`
 	Members   []Member  `db:"-"`
-	CreatedAt time.Time `db:"created_at"`
+	ID        int       `db:"id"`
 }
 
 type Member struct {
+	CreatedAt time.Time `db:"created_at"`
 	UserID    string    `db:"id"`
 	Username  string    `db:"username"`
 	TeamID    int       `db:"team_id"`
 	IsActive  bool      `db:"is_active"`
-	CreatedAt time.Time `db:"created_at"`
 }

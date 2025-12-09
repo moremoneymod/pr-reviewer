@@ -22,10 +22,13 @@ func ToDomainTeamFromEntity(repoTeam *entity.Team) *domain.Team {
 		ID:   repoTeam.ID,
 		Name: repoTeam.Name,
 	}
+
 	team.Members = make([]domain.Member, len(repoTeam.Members))
+
 	for i, member := range repoTeam.Members {
 		team.Members[i] = ToDomainMemberFromEntity(member)
 	}
+
 	return team
 }
 
@@ -48,6 +51,7 @@ func ToDomainPRShortsFromEntity(prs []*entity.PRShort) []*domain.PRShort {
 			Status:   pr.Status,
 		}
 	}
+
 	return prShorts
 }
 
@@ -66,6 +70,7 @@ func ToDomainMembersFromEntity(repoMembers []entity.Member) []domain.Member {
 	for i, member := range repoMembers {
 		members[i] = ToDomainMemberFromEntity(member)
 	}
+
 	return members
 }
 

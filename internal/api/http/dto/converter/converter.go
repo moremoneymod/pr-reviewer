@@ -13,6 +13,7 @@ func ToDomainTeamFromDTO(teamDTO request.TeamRequest) *domain.Team {
 	for i, member := range teamDTO.Members {
 		members[i] = ToDomainMemberFromDTO(member)
 	}
+
 	return &domain.Team{
 		Name:    teamDTO.TeamName,
 		Members: members,
@@ -31,7 +32,9 @@ func ToDTOTeamFromDomain(teamDomain *domain.Team) response.TeamResponse {
 	team := response.TeamResponse{
 		TeamName: teamDomain.Name,
 	}
+
 	team.Members = make([]response.TeamMember, 0, len(teamDomain.Members))
+
 	for _, member := range teamDomain.Members {
 		team.Members = append(team.Members, ToDTOTeamMemberFromDomain(member))
 	}
@@ -90,6 +93,7 @@ func ToDTOPRsShortFromDomain(PRsShortDomain []*domain.PRShort) []response.PRShor
 	for _, prShort := range PRsShortDomain {
 		prsDto = append(prsDto, ToDTOPRShortFromDomain(prShort))
 	}
+
 	return prsDto
 }
 
@@ -130,7 +134,7 @@ func PRStatusToString(status domain.PRStatus) string {
 		return "OPEN"
 	case domain.PRStatusMerged:
 		return "MERGED"
-	default:
+	defaultgit:
 		return "OPEN"
 	}
 }

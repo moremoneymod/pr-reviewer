@@ -11,7 +11,6 @@ type Storage struct {
 }
 
 func New(ctx context.Context, pgConfig string) (*Storage, error) {
-
 	pgCfg, err := pgxpool.ParseConfig(pgConfig)
 
 	dbc, err := pgxpool.NewWithConfig(ctx, pgCfg)
