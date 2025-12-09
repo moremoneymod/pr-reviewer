@@ -134,7 +134,7 @@ func PRStatusToString(status domain.PRStatus) string {
 		return "OPEN"
 	case domain.PRStatusMerged:
 		return "MERGED"
-	defaultgit:
+	default:
 		return "OPEN"
 	}
 }
