@@ -10,14 +10,14 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/moremoneymod/pr-reviewer/internal/repository"
 	"github.com/moremoneymod/pr-reviewer/internal/repository/converter"
-	repo "github.com/moremoneymod/pr-reviewer/internal/repository/entity"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/domain"
+	entity "github.com/moremoneymod/pr-reviewer/internal/repository/entity"
+	domain "github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
-func (s *Storage) Create(ctx context.Context, pr serv.PR) (*serv.PR, error) {
+func (s *Storage) Create(ctx context.Context, pr domain.PR) (*domain.PR, error) {
 	const op = "internal.repository.postgres.postgres.Create"
 
-	prEntity := repo.PR{
+	prEntity := entity.PR{
 		ID:        pr.ID,
 		Name:      pr.Name,
 		AuthorID:  pr.AuthorID,
@@ -80,7 +80,7 @@ func (s *Storage) Create(ctx context.Context, pr serv.PR) (*serv.PR, error) {
 	return converter.ToDomainPRFromEntity(&prEntity), nil
 }
 
-func (s *Storage) Get(ctx context.Context, prId string) (*serv.PR, error) {
+func (s *Storage) Get(ctx context.Context, prId string) (*domain.PR, error) {
 	const op = "internal.repository.postgres.postgres.Get"
 
 	builder := sq.Select("id", "name", "author_id", "status", "created_at", "merged_at").
@@ -92,7 +92,7 @@ func (s *Storage) Get(ctx context.Context, prId string) (*serv.PR, error) {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	var pr repo.PR
+	var pr entity.PR
 	err = pgxscan.Get(ctx, s.pgxPool, &pr, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
@@ -118,7 +118,7 @@ func (s *Storage) Get(ctx context.Context, prId string) (*serv.PR, error) {
 	return converter.ToDomainPRFromEntity(&pr), nil
 }
 
-func (s *Storage) GetAllPR(ctx context.Context) ([]*serv.PR, error) {
+func (s *Storage) GetAllPR(ctx context.Context) ([]*domain.PR, error) {
 	const op = "internal.repository.postgres.postgres.GetAllPR"
 
 	// Используем CTE для получения reviewers
@@ -160,10 +160,10 @@ func (s *Storage) GetAllPR(ctx context.Context) ([]*serv.PR, error) {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	prs := make([]*serv.PR, len(rows))
+	prs := make([]*domain.PR, len(rows))
 	for i, row := range rows {
 
-		prs[i] = &serv.PR{
+		prs[i] = &domain.PR{
 			ID:        row.ID,
 			Name:      row.Name,
 			AuthorID:  row.AuthorID,
@@ -177,7 +177,7 @@ func (s *Storage) GetAllPR(ctx context.Context) ([]*serv.PR, error) {
 	return prs, nil
 }
 
-func (s *Storage) Merge(ctx context.Context, prId string) (*serv.PR, error) {
+func (s *Storage) Merge(ctx context.Context, prId string) (*domain.PR, error) {
 	const op = "internal.repository.postgres.postgres.Merge"
 
 	builder := sq.Update("pull_requests").
@@ -226,4 +226,26 @@ func (s *Storage) GetPullRequestsIdsByReviewer(ctx context.Context, reviewerId s
 	}
 
 	return pullRequestsIds, nil
+}
+
+func (s *Storage) GetPRStatistics(ctx context.Context) (*domain.PRStatistics, error) {
+	const op = "internal.repository.postgres.postgres.GetPRStatistics"
+
+	builder := sq.Select(
+		"COUNT(*) as total",
+		"COUNT(CASE WHEN status = 'OPEN' THEN 1 END) as open",
+		"COUNT(CASE WHEN status = 'MERGED' THEN 1 END) as merged",
+	).From("pull_requests")
+	query, args, err := builder.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	var pullRequestsStats entity.PRStatistics
+	err = pgxscan.Select(ctx, s.pgxPool, &pullRequestsStats, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return converter.ToDomainPRStatisticsFromEntity(&pullRequestsStats), nil
 }
