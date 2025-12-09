@@ -5,16 +5,20 @@ type StatisticsResponse struct {
 }
 
 type StatisticsData struct {
-	UserAssignments map[string]int      `json:"user_assignments"`
-	PRAssignments   map[string]int      `json:"pr_assignments"`
-	TeamStats       map[string]TeamStat `json:"team_stats"`
-	TotalPRs        int                 `json:"total_prs"`
-	OpenPRs         int                 `json:"open_prs"`
-	MergedPRs       int                 `json:"merged_prs"`
+	UserAssignments []UserAssignmentStat `json:"assignments"`
+	TotalPRs        int                  `json:"totalPRs"`
+	OpenPRs         int                  `json:"openPRs"`
+	MergedPRs       int                  `json:"mergedPRs"`
+	TotalTeams      int                  `json:"totalTeams"`
+	TotalUsers      int                  `json:"totalUsers"`
+	ActiveUsers     int                  `json:"activeUsers"`
 }
 
-type TeamStat struct {
-	MemberCount   int `json:"member_count"`
-	ActiveMembers int `json:"active_members"`
-	PRCount       int `json:"pr_count"`
+type UserAssignmentStat struct {
+	UserID            string `json:"userId"`
+	Username          string `json:"username"`
+	TeamName          string `json:"teamName"`
+	TotalAssignments  int    `json:"totalAssignments"`
+	OpenAssignments   int    `json:"openAssignments"`
+	MergedAssignments int    `json:"mergedAssignments"`
 }
