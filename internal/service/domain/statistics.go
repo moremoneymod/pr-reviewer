@@ -1,16 +1,20 @@
 package domain
 
 type Statistics struct {
-	UserAssignments map[string]int
-	PRAssignments   map[string]int
-	TeamStats       map[string]TeamStat
+	UserAssignments []UserAssignmentStat
 	TotalPRs        int
 	OpenPRs         int
 	MergedPRs       int
+	TotalTeams      int
+	TotalUsers      int
+	ActiveUsers     int
 }
 
-type TeamStat struct {
-	MemberCount   int
-	ActiveMembers int
-	PRCount       int
+type UserAssignmentStat struct {
+	UserID            string
+	Username          string
+	TeamName          string
+	TotalAssignments  int
+	OpenAssignments   int
+	MergedAssignments int
 }
