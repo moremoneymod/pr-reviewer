@@ -11,14 +11,14 @@ import (
 	"github.com/go-chi/render"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/converter"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/request"
-	errors2 "github.com/moremoneymod/pr-reviewer/internal/errors"
+	apiErrors "github.com/moremoneymod/pr-reviewer/internal/errors"
 	"github.com/moremoneymod/pr-reviewer/internal/lib/logger/sl"
 	"github.com/moremoneymod/pr-reviewer/internal/service"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	domain "github.com/moremoneymod/pr-reviewer/internal/service/entity"
 )
 
 type TeamAdder interface {
-	Create(ctx context.Context, team *serv.Team) (*serv.Team, error)
+	Create(ctx context.Context, team *domain.Team) (*domain.Team, error)
 }
 
 func New(log *slog.Logger, teamAdder TeamAdder) http.HandlerFunc {
@@ -33,32 +33,32 @@ func New(log *slog.Logger, teamAdder TeamAdder) http.HandlerFunc {
 			log.Error("error decoding body", sl.Err(err))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeBadRequest, "error decoding body"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeBadRequest, "error decoding body"))
 
 			return
 		}
 
 		log = log.With(slog.String("teamName", req.TeamName))
 
-		team := converter.ToTeamFromDto(req)
+		team := converter.ToDomainTeamFromDTO(req)
 
 		createdTeam, err := teamAdder.Create(context.Background(), team)
 		if errors.Is(err, service.ErrTeamExists) {
 			log.Info("team already exists")
 			render.Status(r, http.StatusConflict)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeTeamExists, fmt.Sprintf("%s already exists", team.Name)))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeTeamExists, fmt.Sprintf("%s already exists", team.Name)))
 
 			return
 		}
 		if err != nil {
 			log.Error("internal error", sl.Err(err))
 			render.Status(r, http.StatusInternalServerError)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeInternalServer, "internal server error"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeInternalServer, "internal server error"))
 
 			return
 		}
 
-		response := converter.ToTeamDtoFromService(createdTeam)
+		response := converter.ToDTOTeamFromDomain(createdTeam)
 
 		log.Info("team created")
 

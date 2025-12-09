@@ -10,14 +10,14 @@ import (
 	"github.com/go-chi/render"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/converter"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/request"
-	errors2 "github.com/moremoneymod/pr-reviewer/internal/errors"
+	apiErrors "github.com/moremoneymod/pr-reviewer/internal/errors"
 	"github.com/moremoneymod/pr-reviewer/internal/lib/logger/sl"
 	"github.com/moremoneymod/pr-reviewer/internal/service"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	domain "github.com/moremoneymod/pr-reviewer/internal/service/entity"
 )
 
 type PRCreator interface {
-	CreatePR(ctx context.Context, prId string, prName string, authorId string) (*serv.PR, error)
+	CreatePR(ctx context.Context, prId string, prName string, authorId string) (*domain.PR, error)
 }
 
 func New(log *slog.Logger, prCreator PRCreator) http.HandlerFunc {
@@ -30,9 +30,8 @@ func New(log *slog.Logger, prCreator PRCreator) http.HandlerFunc {
 		var req request.PRCreateRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			log.Error("error decoding body", sl.Err(err))
-
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeBadRequest, "error decoding body"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeBadRequest, "error decoding body"))
 
 			return
 		}
@@ -44,33 +43,33 @@ func New(log *slog.Logger, prCreator PRCreator) http.HandlerFunc {
 		if errors.Is(err, service.ErrPRExists) {
 			log.Warn("PR already exists", sl.Err(err))
 			render.Status(r, http.StatusConflict)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodePRExists, "PR already exists"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodePRExists, "PR already exists"))
 
 			return
 		}
 		if errors.Is(err, service.ErrUserNotFound) {
 			log.Warn("User not found", sl.Err(err))
 			render.Status(r, http.StatusNotFound)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeNotFound, "User not found"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeNotFound, "User not found"))
 
 			return
 		}
 		if errors.Is(err, service.ErrTeamNotFound) {
 			log.Warn("Team not found", sl.Err(err))
 			render.Status(r, http.StatusNotFound)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeNotFound, "Team not found"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeNotFound, "Team not found"))
 
 			return
 		}
 		if err != nil {
 			log.Error("error creating PR", sl.Err(err))
 			render.Status(r, http.StatusInternalServerError)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeInternalServer, "error creating PR"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeInternalServer, "error creating PR"))
 
 			return
 		}
 
-		response := converter.ToPRDtoFromService(createdPR)
+		response := converter.ToDTOPRFromDomain(createdPR)
 
 		log.Info("successfully created PR", slog.String("id", createdPR.ID))
 

@@ -10,14 +10,14 @@ import (
 	"github.com/go-chi/render"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/converter"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/request"
-	errors2 "github.com/moremoneymod/pr-reviewer/internal/errors"
+	apiErrors "github.com/moremoneymod/pr-reviewer/internal/errors"
 	"github.com/moremoneymod/pr-reviewer/internal/lib/logger/sl"
 	"github.com/moremoneymod/pr-reviewer/internal/service"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	domain "github.com/moremoneymod/pr-reviewer/internal/service/entity"
 )
 
 type PRMerger interface {
-	Merge(ctx context.Context, prId string) (*serv.PR, error)
+	Merge(ctx context.Context, prId string) (*domain.PR, error)
 }
 
 func New(log *slog.Logger, prMerger PRMerger) http.HandlerFunc {
@@ -32,7 +32,7 @@ func New(log *slog.Logger, prMerger PRMerger) http.HandlerFunc {
 			log.Error("error decoding body", sl.Err(err))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeBadRequest, "error decoding body"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeBadRequest, "error decoding body"))
 
 			return
 		}
@@ -44,19 +44,19 @@ func New(log *slog.Logger, prMerger PRMerger) http.HandlerFunc {
 		if errors.Is(err, service.ErrPRNotFound) {
 			log.Warn("PR not found", sl.Err(err))
 			render.Status(r, http.StatusNotFound)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeNotFound, "PR not found"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeNotFound, "PR not found"))
 
 			return
 		}
 		if err != nil {
 			log.Error("error calling PRMerger", sl.Err(err))
 			render.Status(r, http.StatusInternalServerError)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeInternalServer, "error merging PR"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeInternalServer, "error merging PR"))
 
 			return
 		}
 
-		response := converter.ToPRDtoFromService(mergedPR)
+		response := converter.ToDTOPRFromDomain(mergedPR)
 
 		log.Info("pr merged successfully", slog.String("pr", mergedPR.ID))
 

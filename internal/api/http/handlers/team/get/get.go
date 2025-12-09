@@ -8,14 +8,14 @@ import (
 
 	"github.com/go-chi/render"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/converter"
-	errors2 "github.com/moremoneymod/pr-reviewer/internal/errors"
+	apiErrors "github.com/moremoneymod/pr-reviewer/internal/errors"
 	"github.com/moremoneymod/pr-reviewer/internal/lib/logger/sl"
 	"github.com/moremoneymod/pr-reviewer/internal/service"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	domain "github.com/moremoneymod/pr-reviewer/internal/service/entity"
 )
 
 type TeamService interface {
-	Get(ctx context.Context, teamName string) (*serv.Team, error)
+	Get(ctx context.Context, teamName string) (*domain.Team, error)
 }
 
 func New(log *slog.Logger, teamService TeamService) http.HandlerFunc {
@@ -30,7 +30,7 @@ func New(log *slog.Logger, teamService TeamService) http.HandlerFunc {
 		if teamName == "" {
 			log.Error("invalid request")
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeBadRequest, "team_name is required"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeBadRequest, "team_name is required"))
 
 			return
 		}
@@ -42,7 +42,7 @@ func New(log *slog.Logger, teamService TeamService) http.HandlerFunc {
 			log.Error("team not found")
 
 			render.Status(r, http.StatusNotFound)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeNotFound, "team not found"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeNotFound, "team not found"))
 
 			return
 		}
@@ -50,12 +50,12 @@ func New(log *slog.Logger, teamService TeamService) http.HandlerFunc {
 			log.Error("internal error", sl.Err(err))
 
 			render.Status(r, http.StatusInternalServerError)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeInternalServer, "internal server error"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeInternalServer, "internal server error"))
 
 			return
 		}
 
-		response := converter.ToTeamDtoFromService(team)
+		response := converter.ToDTOTeamFromDomain(team)
 
 		log.Info("successfully read team", slog.String("team_name", teamName))
 

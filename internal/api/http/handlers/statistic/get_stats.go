@@ -7,13 +7,13 @@ import (
 
 	"github.com/go-chi/render"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/converter"
-	errors2 "github.com/moremoneymod/pr-reviewer/internal/errors"
+	apiErrors "github.com/moremoneymod/pr-reviewer/internal/errors"
 	"github.com/moremoneymod/pr-reviewer/internal/lib/logger/sl"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	domain "github.com/moremoneymod/pr-reviewer/internal/service/entity"
 )
 
 type StatsProvider interface {
-	GetStatistics(ctx context.Context) (*serv.Statistics, error)
+	GetStatistics(ctx context.Context) (*domain.Statistics, error)
 }
 
 func New(log *slog.Logger, statsProvider StatsProvider) http.HandlerFunc {
@@ -27,11 +27,11 @@ func New(log *slog.Logger, statsProvider StatsProvider) http.HandlerFunc {
 		if err != nil {
 			log.Error("failed getting stats", sl.Err(err))
 			render.Status(r, http.StatusInternalServerError)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeInternalServer, "failed to get statistics"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeInternalServer, "failed to get statistics"))
 			return
 		}
 
-		response := converter.TOStatisticsDtoFromService(stats)
+		response := converter.ToDTOStatisticsFromDomain(stats)
 
 		log.Info("success getting stats")
 

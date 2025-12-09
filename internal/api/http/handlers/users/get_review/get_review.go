@@ -7,13 +7,13 @@ import (
 
 	"github.com/go-chi/render"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/converter"
-	errors2 "github.com/moremoneymod/pr-reviewer/internal/errors"
+	apiErrors "github.com/moremoneymod/pr-reviewer/internal/errors"
 	"github.com/moremoneymod/pr-reviewer/internal/lib/logger/sl"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	domain "github.com/moremoneymod/pr-reviewer/internal/service/entity"
 )
 
 type UserReviewProvider interface {
-	GetReview(ctx context.Context, userId string) ([]*serv.PRShort, error)
+	GetReview(ctx context.Context, userId string) ([]*domain.PRShort, error)
 }
 
 func New(log *slog.Logger, userReviewProvider UserReviewProvider) http.HandlerFunc {
@@ -26,7 +26,7 @@ func New(log *slog.Logger, userReviewProvider UserReviewProvider) http.HandlerFu
 		userId := r.URL.Query().Get("UserIdQuery")
 		if userId == "" {
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeBadRequest, "missing userId"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeBadRequest, "missing userId"))
 			return
 		}
 
@@ -36,12 +36,12 @@ func New(log *slog.Logger, userReviewProvider UserReviewProvider) http.HandlerFu
 		if err != nil {
 			log.Error("failed to get reviews", sl.Err(err))
 			render.Status(r, http.StatusInternalServerError)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeInternalServer, "failed to get reviews"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeInternalServer, "failed to get reviews"))
 
 			return
 		}
 
-		response := converter.ToPRsShortDtoFromService(reviews)
+		response := converter.ToDTOPRsShortFromDomain(reviews)
 
 		log.Info("successfully got reviews")
 

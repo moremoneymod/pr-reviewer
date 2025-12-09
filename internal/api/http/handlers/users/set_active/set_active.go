@@ -10,14 +10,14 @@ import (
 	"github.com/go-chi/render"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/converter"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/request"
-	errors2 "github.com/moremoneymod/pr-reviewer/internal/errors"
+	apiErrors "github.com/moremoneymod/pr-reviewer/internal/errors"
 	"github.com/moremoneymod/pr-reviewer/internal/lib/logger/sl"
 	"github.com/moremoneymod/pr-reviewer/internal/service"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	domain "github.com/moremoneymod/pr-reviewer/internal/service/entity"
 )
 
 type UserActivityChanger interface {
-	SetIsActive(ctx context.Context, userId string, isActive bool) (*serv.User, error)
+	SetIsActive(ctx context.Context, userId string, isActive bool) (*domain.User, error)
 }
 
 func New(log *slog.Logger, userActivitySetter UserActivityChanger) http.HandlerFunc {
@@ -32,7 +32,7 @@ func New(log *slog.Logger, userActivitySetter UserActivityChanger) http.HandlerF
 			log.Error("error decoding body", sl.Err(err))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeBadRequest, "error decoding body"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeBadRequest, "error decoding body"))
 
 			return
 		}
@@ -43,17 +43,17 @@ func New(log *slog.Logger, userActivitySetter UserActivityChanger) http.HandlerF
 		if errors.Is(err, service.ErrUserNotFound) {
 			log.Warn("user not found", sl.Err(err))
 			render.Status(r, http.StatusNotFound)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeNotFound, "user not found"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeNotFound, "user not found"))
 
 			return
 		}
 		if err != nil {
 			log.Error("error setting user activity", sl.Err(err))
 			render.Status(r, http.StatusInternalServerError)
-			render.JSON(w, r, errors2.NewErrorResponse(errors2.ErrorCodeInternalServer, "error setting user activity"))
+			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeInternalServer, "error setting user activity"))
 		}
 
-		response := converter.ToUserDtoFromService(updatedUser)
+		response := converter.ToDTOUserFromDomain(updatedUser)
 
 		log.Info("user activity setting successfully")
 
