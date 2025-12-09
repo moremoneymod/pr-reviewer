@@ -6,6 +6,15 @@ export
 install-deps:
 	set GOBIN=$(LOCAL_BIN) && go install github.com/pressly/goose/v3/cmd/goose@latest
 
+install-golangci-lint:
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+lint:
+	golangci-lint run --config .golangci.yml
+
+lint-fix:
+	golangci-lint run --config .golangci.yml --fix
+
 local-migration-status:
 	goose -dir ${MIGRATION_DIR} postgres ${PG_DSN} status -v
 
