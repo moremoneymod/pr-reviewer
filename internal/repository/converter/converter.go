@@ -74,7 +74,7 @@ func ToDomainMembersFromEntity(MembersEntity []entity.Member) []domain.Member {
 	return members
 }
 
-func ToDomainUserAssignmentStatsFromEntity(UserAssignmentStatsEntity []*entity.UserAssignmentStatistics) []*domain.UserAssignmentStat {
+func ToDomainUserAssignmentStatsFromEntity(UserAssignmentStatsEntity []entity.UserAssignmentStatistics) []*domain.UserAssignmentStat {
 	userAssignmentStats := make([]*domain.UserAssignmentStat, len(UserAssignmentStatsEntity))
 	for i, userAssignmentStat := range UserAssignmentStatsEntity {
 		userAssignmentStats[i] = &domain.UserAssignmentStat{
