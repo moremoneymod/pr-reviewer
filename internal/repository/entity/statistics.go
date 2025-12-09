@@ -1,7 +1,7 @@
 package entity
 
 type UserAssignmentStatistics struct {
-	UserID            int    `db:"user_id"`
+	UserID            string `db:"user_id"`
 	Username          string `db:"username"`
 	TeamName          string `db:"team_name"`
 	TotalAssignments  int    `db:"total_assignments"`
