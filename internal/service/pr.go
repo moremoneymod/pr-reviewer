@@ -9,7 +9,7 @@ import (
 
 	"github.com/moremoneymod/pr-reviewer/internal/lib/logger/sl"
 	"github.com/moremoneymod/pr-reviewer/internal/repository"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	serv "github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
 func (s *Service) CreatePR(ctx context.Context, prId string, prName string, authorId string) (*serv.PR, error) {

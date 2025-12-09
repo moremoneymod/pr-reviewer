@@ -4,7 +4,7 @@ import (
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/request"
 	request2 "github.com/moremoneymod/pr-reviewer/internal/api/http/dto/response"
 	repo "github.com/moremoneymod/pr-reviewer/internal/repository/entity"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	serv "github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
 func ToTeamFromService(pr *serv.Team) *repo.Team {

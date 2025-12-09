@@ -6,7 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/moremoneymod/pr-reviewer/internal/lib/logger/sl"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	serv "github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
 func (s *Service) GetStatistics(ctx context.Context) (*serv.Statistics, error) {

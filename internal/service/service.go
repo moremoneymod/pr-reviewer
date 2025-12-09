@@ -5,7 +5,7 @@ import (
 	"errors"
 	"log/slog"
 
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	serv "github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
 var (

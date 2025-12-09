@@ -8,7 +8,7 @@ import (
 
 	"github.com/moremoneymod/pr-reviewer/internal/lib/logger/sl"
 	"github.com/moremoneymod/pr-reviewer/internal/repository"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	serv "github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
 func (s *Service) Create(ctx context.Context, team *serv.Team) (*serv.Team, error) {

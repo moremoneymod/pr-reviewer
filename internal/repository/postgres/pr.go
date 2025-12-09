@@ -11,7 +11,7 @@ import (
 	"github.com/moremoneymod/pr-reviewer/internal/repository"
 	"github.com/moremoneymod/pr-reviewer/internal/repository/converter"
 	repo "github.com/moremoneymod/pr-reviewer/internal/repository/entity"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	serv "github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
 func (s *Storage) Create(ctx context.Context, pr serv.PR) (*serv.PR, error) {

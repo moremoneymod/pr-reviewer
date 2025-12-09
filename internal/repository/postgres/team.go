@@ -11,7 +11,7 @@ import (
 	"github.com/moremoneymod/pr-reviewer/internal/repository"
 	"github.com/moremoneymod/pr-reviewer/internal/repository/converter"
 	"github.com/moremoneymod/pr-reviewer/internal/repository/entity"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	serv "github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
 func (s *Storage) CreateTeam(ctx context.Context, team *serv.Team) (*serv.Team, error) {

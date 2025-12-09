@@ -9,7 +9,7 @@ import (
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/converter"
 	apiErrors "github.com/moremoneymod/pr-reviewer/internal/errors"
 	"github.com/moremoneymod/pr-reviewer/internal/lib/logger/sl"
-	domain "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	domain "github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
 type StatsProvider interface {

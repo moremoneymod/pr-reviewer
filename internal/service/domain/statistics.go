@@ -1,4 +1,4 @@
-package entity
+package domain
 
 type Statistics struct {
 	UserAssignments map[string]int

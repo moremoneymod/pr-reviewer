@@ -2,7 +2,7 @@ package converter
 
 import (
 	"github.com/moremoneymod/pr-reviewer/internal/repository/entity"
-	domain "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	domain "github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
 func ToDomainPRFromEntity(pr *entity.PR) *domain.PR {

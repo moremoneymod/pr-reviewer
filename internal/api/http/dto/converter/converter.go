@@ -5,7 +5,7 @@ import (
 
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/request"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/response"
-	domain "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	domain "github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
 func ToDomainTeamFromDTO(teamDTO request.TeamRequest) *domain.Team {
