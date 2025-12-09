@@ -1,7 +1,7 @@
 package converter
 
 import (
-	entity "github.com/moremoneymod/pr-reviewer/internal/repository/entity"
+	"github.com/moremoneymod/pr-reviewer/internal/repository/entity"
 	domain "github.com/moremoneymod/pr-reviewer/internal/service/entity"
 )
 
