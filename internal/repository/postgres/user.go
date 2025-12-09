@@ -156,7 +156,7 @@ func (s *Storage) GetUserStatistics(ctx context.Context) (*domain.UserStatistics
 	return converter.ToDomainUserStatisticsFromEntity(&userStatistics), nil
 }
 
-func (s *Storage) GetUserAssignmentStatistics(ctx context.Context) ([]*domain.UserAssignmentStat, error) {
+func (s *Storage) GetUserAssignmentStatistics(ctx context.Context) ([]domain.UserAssignmentStat, error) {
 	const op = "internal.repository.postgres.team.GetUserAssignmentStatistics"
 
 	builder := sq.Select("users.id as user_id, users.username, teams.name as team_name, COUNT(prw.id) as total_assignments, COUNT(CASE WHEN pr.status = 'OPEN' THEN 1 END) as open_assignments, COUNT(CASE WHEN pr.status = 'MERGED' THEN 1 END) as merged_assignments").
