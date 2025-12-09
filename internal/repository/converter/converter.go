@@ -5,45 +5,45 @@ import (
 	domain "github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
-func ToDomainPRFromEntity(pr *entity.PR) *domain.PR {
+func ToDomainPRFromEntity(PREntity *entity.PR) *domain.PR {
 	return &domain.PR{
-		ID:        pr.ID,
-		Name:      pr.Name,
-		AuthorID:  pr.AuthorID,
-		Status:    StringToPRStatus(pr.Status),
-		Reviewers: pr.Reviewers,
-		CreatedAt: &pr.CreatedAt,
-		MergedAt:  pr.MergedAt,
+		ID:        PREntity.ID,
+		Name:      PREntity.Name,
+		AuthorID:  PREntity.AuthorID,
+		Status:    StringToPRStatus(PREntity.Status),
+		Reviewers: PREntity.Reviewers,
+		CreatedAt: &PREntity.CreatedAt,
+		MergedAt:  PREntity.MergedAt,
 	}
 }
 
-func ToDomainTeamFromEntity(repoTeam *entity.Team) *domain.Team {
+func ToDomainTeamFromEntity(TeamEntity *entity.Team) *domain.Team {
 	team := &domain.Team{
-		ID:   repoTeam.ID,
-		Name: repoTeam.Name,
+		ID:   TeamEntity.ID,
+		Name: TeamEntity.Name,
 	}
 
-	team.Members = make([]domain.Member, len(repoTeam.Members))
+	team.Members = make([]domain.Member, len(TeamEntity.Members))
 
-	for i, member := range repoTeam.Members {
+	for i, member := range TeamEntity.Members {
 		team.Members[i] = ToDomainMemberFromEntity(member)
 	}
 
 	return team
 }
 
-func ToDomainMemberFromEntity(member entity.Member) domain.Member {
+func ToDomainMemberFromEntity(memberEntity entity.Member) domain.Member {
 	return domain.Member{
-		UserID:   member.UserID,
-		Username: member.Username,
-		TeamID:   member.TeamID,
-		IsActive: member.IsActive,
+		UserID:   memberEntity.UserID,
+		Username: memberEntity.Username,
+		TeamID:   memberEntity.TeamID,
+		IsActive: memberEntity.IsActive,
 	}
 }
 
-func ToDomainPRShortsFromEntity(prs []*entity.PRShort) []*domain.PRShort {
-	prShorts := make([]*domain.PRShort, len(prs))
-	for i, pr := range prs {
+func ToDomainPRShortsFromEntity(PRsEntity []*entity.PRShort) []*domain.PRShort {
+	prShorts := make([]*domain.PRShort, len(PRsEntity))
+	for i, pr := range PRsEntity {
 		prShorts[i] = &domain.PRShort{
 			ID:       pr.ID,
 			Name:     pr.Name,
@@ -55,23 +55,31 @@ func ToDomainPRShortsFromEntity(prs []*entity.PRShort) []*domain.PRShort {
 	return prShorts
 }
 
-func ToDomainUserFromEntity(repoUser *entity.User) *domain.User {
+func ToDomainUserFromEntity(UserEntity *entity.User) *domain.User {
 	return &domain.User{
-		ID:       repoUser.ID,
-		Username: repoUser.Username,
-		TeamID:   repoUser.TeamID,
-		TeamName: repoUser.TeamName,
-		IsActive: repoUser.IsActive,
+		ID:       UserEntity.ID,
+		Username: UserEntity.Username,
+		TeamID:   UserEntity.TeamID,
+		TeamName: UserEntity.TeamName,
+		IsActive: UserEntity.IsActive,
 	}
 }
 
-func ToDomainMembersFromEntity(repoMembers []entity.Member) []domain.Member {
-	members := make([]domain.Member, len(repoMembers))
-	for i, member := range repoMembers {
+func ToDomainMembersFromEntity(MembersEntity []entity.Member) []domain.Member {
+	members := make([]domain.Member, len(MembersEntity))
+	for i, member := range MembersEntity {
 		members[i] = ToDomainMemberFromEntity(member)
 	}
 
 	return members
+}
+
+func ToDomainPRStatisticsFromEntity(PRStatisticsEntity *entity.PRStatistics) *domain.PRStatistics {
+	return &domain.PRStatistics{
+		TotalPRs:  PRStatisticsEntity.TotalPRs,
+		OpenPRs:   PRStatisticsEntity.OpenPRs,
+		MergedPRs: PRStatisticsEntity.MergedPRs,
+	}
 }
 
 func StringToPRStatus(status string) domain.PRStatus {
