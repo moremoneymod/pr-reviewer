@@ -8,11 +8,11 @@ import (
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/moremoneymod/pr-reviewer/internal/repository"
 	"github.com/moremoneymod/pr-reviewer/internal/repository/converter"
-	repo "github.com/moremoneymod/pr-reviewer/internal/repository/entity"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/domain"
+	entity "github.com/moremoneymod/pr-reviewer/internal/repository/entity"
+	domain "github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
-func (s *Storage) SetIsActive(ctx context.Context, userId string, isActive bool) (*serv.User, error) {
+func (s *Storage) SetIsActive(ctx context.Context, userId string, isActive bool) (*domain.User, error) {
 	const op = "internal.repository.postgres.user.SetIsActive"
 
 	builder := sq.Update("users").
@@ -40,7 +40,7 @@ func (s *Storage) SetIsActive(ctx context.Context, userId string, isActive bool)
 	return user, nil
 }
 
-func (s *Storage) GetReview(ctx context.Context, prIds []string) ([]*serv.PRShort, error) {
+func (s *Storage) GetReview(ctx context.Context, prIds []string) ([]*domain.PRShort, error) {
 	const op = "internal.repository.postgres.user.GetReview"
 
 	builder := sq.Select("id", "name", "author_id", "status").
@@ -52,7 +52,7 @@ func (s *Storage) GetReview(ctx context.Context, prIds []string) ([]*serv.PRShor
 		return nil, fmt.Errorf("%s%w", op, err)
 	}
 
-	var result []*repo.PRShort
+	var result []*entity.PRShort
 	err = pgxscan.Select(ctx, s.pgxPool, &result, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
@@ -61,7 +61,7 @@ func (s *Storage) GetReview(ctx context.Context, prIds []string) ([]*serv.PRShor
 	return converter.ToDomainPRShortsFromEntity(result), err
 }
 
-func (s *Storage) GetUser(ctx context.Context, userId string) (*serv.User, error) {
+func (s *Storage) GetUser(ctx context.Context, userId string) (*domain.User, error) {
 	const op = "internal.repository.postgres.user.GetUser"
 
 	builder := sq.Select("id", "username", "team_id", "is_active").
@@ -73,7 +73,7 @@ func (s *Storage) GetUser(ctx context.Context, userId string) (*serv.User, error
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	var result repo.User
+	var result entity.User
 	err = pgxscan.Get(ctx, s.pgxPool, &result, query, args...)
 	if pgxscan.NotFound(err) {
 		return nil, repository.ErrUserNotFound
@@ -136,4 +136,22 @@ func (s *Storage) ReplaceReviewer(ctx context.Context, newReviewerId string, old
 	}
 
 	return nil
+}
+
+func (s *Storage) GetUserStatistics(ctx context.Context) (*domain.UserStatistics, error) {
+	const op = "internal.repository.postgres.user.GetUserStatistics"
+
+	builder := sq.Select("count(*) as total, count(CASE WHEN is_active = true THEN 1 END) as active").
+		From("users")
+	query, args, err := builder.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+	var userStatistics entity.UserStatistics
+	err = pgxscan.Get(ctx, s.pgxPool, &userStatistics, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return converter.ToDomainUserStatisticsFromEntity(&userStatistics), nil
 }
