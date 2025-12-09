@@ -7,7 +7,7 @@ install-deps:
 	set GOBIN=$(LOCAL_BIN) && go install github.com/pressly/goose/v3/cmd/goose@latest
 
 install-golangci-lint:
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.7.2
 
 lint:
 	golangci-lint run --config .golangci.yml
