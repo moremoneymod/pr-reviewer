@@ -77,7 +77,7 @@ func (s *Storage) Create(ctx context.Context, pr serv.PR) (*serv.PR, error) {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return converter.ToPRFromRepository(&prEntity), nil
+	return converter.ToDomainPRFromEntity(&prEntity), nil
 }
 
 func (s *Storage) Get(ctx context.Context, prId string) (*serv.PR, error) {
@@ -115,7 +115,7 @@ func (s *Storage) Get(ctx context.Context, prId string) (*serv.PR, error) {
 
 	pr.Reviewers = reviewers
 
-	return converter.ToPRFromRepository(&pr), nil
+	return converter.ToDomainPRFromEntity(&pr), nil
 }
 
 func (s *Storage) GetAllPR(ctx context.Context) ([]*serv.PR, error) {

@@ -1,12 +1,12 @@
 package converter
 
 import (
-	repo "github.com/moremoneymod/pr-reviewer/internal/repository/entity"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	entity "github.com/moremoneymod/pr-reviewer/internal/repository/entity"
+	domain "github.com/moremoneymod/pr-reviewer/internal/service/entity"
 )
 
-func ToPRFromRepository(pr *repo.PR) *serv.PR {
-	return &serv.PR{
+func ToDomainPRFromEntity(pr *entity.PR) *domain.PR {
+	return &domain.PR{
 		ID:        pr.ID,
 		Name:      pr.Name,
 		AuthorID:  pr.AuthorID,
@@ -17,20 +17,20 @@ func ToPRFromRepository(pr *repo.PR) *serv.PR {
 	}
 }
 
-func ToTeamFromRepository(repoTeam *repo.Team) *serv.Team {
-	team := &serv.Team{
+func ToDomainTeamFromEntity(repoTeam *entity.Team) *domain.Team {
+	team := &domain.Team{
 		ID:   repoTeam.ID,
 		Name: repoTeam.Name,
 	}
-	team.Members = make([]serv.Member, len(repoTeam.Members))
+	team.Members = make([]domain.Member, len(repoTeam.Members))
 	for i, member := range repoTeam.Members {
-		team.Members[i] = ToMemberFromRepository(member)
+		team.Members[i] = ToDomainMemberFromEntity(member)
 	}
 	return team
 }
 
-func ToMemberFromRepository(member repo.Member) serv.Member {
-	return serv.Member{
+func ToDomainMemberFromEntity(member entity.Member) domain.Member {
+	return domain.Member{
 		UserID:   member.UserID,
 		Username: member.Username,
 		TeamID:   member.TeamID,
@@ -38,10 +38,10 @@ func ToMemberFromRepository(member repo.Member) serv.Member {
 	}
 }
 
-func ToPRShortsFromRepository(prs []*repo.PRShort) []*serv.PRShort {
-	prShorts := make([]*serv.PRShort, len(prs))
+func ToDomainPRShortsFromEntity(prs []*entity.PRShort) []*domain.PRShort {
+	prShorts := make([]*domain.PRShort, len(prs))
 	for i, pr := range prs {
-		prShorts[i] = &serv.PRShort{
+		prShorts[i] = &domain.PRShort{
 			ID:       pr.ID,
 			Name:     pr.Name,
 			AuthorID: pr.AuthorID,
@@ -51,8 +51,8 @@ func ToPRShortsFromRepository(prs []*repo.PRShort) []*serv.PRShort {
 	return prShorts
 }
 
-func ToUserFromRepository(repoUser *repo.User) *serv.User {
-	return &serv.User{
+func ToDomainUserFromEntity(repoUser *entity.User) *domain.User {
+	return &domain.User{
 		ID:       repoUser.ID,
 		Username: repoUser.Username,
 		TeamID:   repoUser.TeamID,
@@ -61,30 +61,30 @@ func ToUserFromRepository(repoUser *repo.User) *serv.User {
 	}
 }
 
-func ToMembersFromRepository(repoMembers []repo.Member) []serv.Member {
-	members := make([]serv.Member, len(repoMembers))
+func ToDomainMembersFromEntity(repoMembers []entity.Member) []domain.Member {
+	members := make([]domain.Member, len(repoMembers))
 	for i, member := range repoMembers {
-		members[i] = ToMemberFromRepository(member)
+		members[i] = ToDomainMemberFromEntity(member)
 	}
 	return members
 }
 
-func StringToPRStatus(status string) serv.PRStatus {
+func StringToPRStatus(status string) domain.PRStatus {
 	switch status {
 	case "OPEN":
-		return serv.PRStatusOpen
+		return domain.PRStatusOpen
 	case "MERGED":
-		return serv.PRStatusMerged
+		return domain.PRStatusMerged
 	default:
-		return serv.PRStatusOpen
+		return domain.PRStatusOpen
 	}
 }
 
-func PRStatusToString(status serv.PRStatus) string {
+func PRStatusToString(status domain.PRStatus) string {
 	switch status {
-	case serv.PRStatusOpen:
+	case domain.PRStatusOpen:
 		return "OPEN"
-	case serv.PRStatusMerged:
+	case domain.PRStatusMerged:
 		return "MERGED"
 	default:
 		return "OPEN"

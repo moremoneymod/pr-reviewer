@@ -106,7 +106,7 @@ func (s *Storage) GetTeam(ctx context.Context, teamName string) (*serv.Team, err
 
 	team.Members = members
 
-	return converter.ToTeamFromRepository(&team), nil
+	return converter.ToDomainTeamFromEntity(&team), nil
 }
 
 func (s *Storage) GetAllTeam(ctx context.Context) ([]*serv.Team, error) {
@@ -153,7 +153,7 @@ func (s *Storage) GetAllTeam(ctx context.Context) ([]*serv.Team, error) {
 		teams[i] = &serv.Team{
 			ID:      row.ID,
 			Name:    row.Name,
-			Members: converter.ToMembersFromRepository(row.Members),
+			Members: converter.ToDomainMembersFromEntity(row.Members),
 		}
 	}
 
@@ -197,5 +197,5 @@ func (s *Storage) GetTeamById(ctx context.Context, teamId int) (*serv.Team, erro
 
 	team.Members = members
 
-	return converter.ToTeamFromRepository(&team), nil
+	return converter.ToDomainTeamFromEntity(&team), nil
 }

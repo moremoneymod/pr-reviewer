@@ -58,7 +58,7 @@ func (s *Storage) GetReview(ctx context.Context, prIds []string) ([]*serv.PRShor
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return converter.ToPRShortsFromRepository(result), err
+	return converter.ToDomainPRShortsFromEntity(result), err
 }
 
 func (s *Storage) GetUser(ctx context.Context, userId string) (*serv.User, error) {
@@ -82,7 +82,7 @@ func (s *Storage) GetUser(ctx context.Context, userId string) (*serv.User, error
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return converter.ToUserFromRepository(&result), nil
+	return converter.ToDomainUserFromEntity(&result), nil
 }
 
 func (s *Storage) GetReviewers(ctx context.Context, teamId int, excludeUserIds []string, limit int) ([]string, error) {
