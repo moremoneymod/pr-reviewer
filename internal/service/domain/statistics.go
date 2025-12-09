@@ -18,3 +18,18 @@ type UserAssignmentStat struct {
 	OpenAssignments   int
 	MergedAssignments int
 }
+
+type PRStatistics struct {
+	TotalPRs  int
+	OpenPRs   int
+	MergedPRs int
+}
+
+type UserStatistics struct {
+	TotalUsers  int
+	ActiveUsers int
+}
+
+type TeamStatistics struct {
+	TotalTeams int
+}
