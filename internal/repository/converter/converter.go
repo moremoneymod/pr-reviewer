@@ -82,6 +82,19 @@ func ToDomainPRStatisticsFromEntity(PRStatisticsEntity *entity.PRStatistics) *do
 	}
 }
 
+func ToDomainUserStatisticsFromEntity(UserStatisticsEntity *entity.UserStatistics) *domain.UserStatistics {
+	return &domain.UserStatistics{
+		TotalUsers:  UserStatisticsEntity.TotalUsers,
+		ActiveUsers: UserStatisticsEntity.ActiveUsers,
+	}
+}
+
+func ToDomainTeamStatisticsFromEntity(TeamStatisticsEntity *entity.TeamStatistics) *domain.TeamStatistics {
+	return &domain.TeamStatistics{
+		TotalTeams: TeamStatisticsEntity.TotalTeams,
+	}
+}
+
 func StringToPRStatus(status string) domain.PRStatus {
 	switch status {
 	case "OPEN":
