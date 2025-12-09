@@ -5,106 +5,106 @@ import (
 
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/request"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/response"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/entity"
+	domain "github.com/moremoneymod/pr-reviewer/internal/service/entity"
 )
 
-func ToTeamFromDto(teamDto request.TeamRequest) *serv.Team {
-	team := serv.Team{
-		Name: teamDto.TeamName,
+func ToDomainTeamFromDTO(teamDTO request.TeamRequest) *domain.Team {
+	members := make([]domain.Member, len(teamDTO.Members))
+	for i, member := range teamDTO.Members {
+		members[i] = ToDomainMemberFromDTO(member)
 	}
-	team.Members = make([]serv.Member, len(teamDto.Members))
-	for i, member := range teamDto.Members {
-		team.Members[i] = ToTeamMemberFromDto(member)
-	}
-	return &team
-}
-
-func ToTeamMemberFromDto(memberDto request.TeamMemberRequest) serv.Member {
-	return serv.Member{
-		UserID:   memberDto.UserID,
-		Username: memberDto.Username,
-		IsActive: memberDto.IsActive,
+	return &domain.Team{
+		Name:    teamDTO.TeamName,
+		Members: members,
 	}
 }
 
-func ToTeamDtoFromService(teamServ *serv.Team) response.TeamResponse {
+func ToDomainMemberFromDTO(memberDTO request.TeamMemberRequest) domain.Member {
+	return domain.Member{
+		UserID:   memberDTO.UserID,
+		Username: memberDTO.Username,
+		IsActive: memberDTO.IsActive,
+	}
+}
+
+func ToDTOTeamFromDomain(teamDomain *domain.Team) response.TeamResponse {
 	team := response.TeamResponse{
-		TeamName: teamServ.Name,
+		TeamName: teamDomain.Name,
 	}
-	team.Members = make([]response.TeamMember, 0, len(teamServ.Members))
-	for _, member := range teamServ.Members {
-		team.Members = append(team.Members, ToTeamMemberDtoFromService(member))
+	team.Members = make([]response.TeamMember, 0, len(teamDomain.Members))
+	for _, member := range teamDomain.Members {
+		team.Members = append(team.Members, ToDTOTeamMemberFromDomain(member))
 	}
 
 	return team
 }
 
-func ToTeamMemberDtoFromService(teamMemberServ serv.Member) response.TeamMember {
+func ToDTOTeamMemberFromDomain(teamMemberDomain domain.Member) response.TeamMember {
 	return response.TeamMember{
-		UserID:   teamMemberServ.UserID,
-		Username: teamMemberServ.Username,
-		IsActive: teamMemberServ.IsActive,
+		UserID:   teamMemberDomain.UserID,
+		Username: teamMemberDomain.Username,
+		IsActive: teamMemberDomain.IsActive,
 	}
 }
 
-func ToPRDtoFromService(pr *serv.PR) response.PRResponse {
+func ToDTOPRFromDomain(PRDomain *domain.PR) response.PRResponse {
 	var createdAtStr, mergedAtStr *string
 
-	if pr.CreatedAt != nil {
-		formatted := pr.CreatedAt.Format(time.RFC3339)
+	if PRDomain.CreatedAt != nil {
+		formatted := PRDomain.CreatedAt.Format(time.RFC3339)
 		createdAtStr = &formatted
 	}
 
-	if pr.MergedAt != nil {
-		formatted := pr.MergedAt.Format(time.RFC3339)
+	if PRDomain.MergedAt != nil {
+		formatted := PRDomain.MergedAt.Format(time.RFC3339)
 		mergedAtStr = &formatted
 	}
 
-	prReviewers := pr.Reviewers
+	prReviewers := PRDomain.Reviewers
 	if prReviewers == nil {
 		prReviewers = []string{}
 	}
 
 	return response.PRResponse{
-		PullRequestID:     pr.ID,
-		PullRequestName:   pr.Name,
-		AuthorID:          pr.AuthorID,
-		Status:            PRStatusToString(pr.Status),
+		PullRequestID:     PRDomain.ID,
+		PullRequestName:   PRDomain.Name,
+		AuthorID:          PRDomain.AuthorID,
+		Status:            PRStatusToString(PRDomain.Status),
 		AssignedReviewers: prReviewers,
 		CreatedAt:         createdAtStr,
 		MergedAt:          mergedAtStr,
 	}
 }
 
-func ToUserDtoFromService(userServ *serv.User) response.UserResponse {
+func ToDTOUserFromDomain(userDomain *domain.User) response.UserResponse {
 	return response.UserResponse{
-		UserID:   userServ.ID,
-		Username: userServ.Username,
-		TeamName: userServ.TeamName,
-		IsActive: userServ.IsActive,
+		UserID:   userDomain.ID,
+		Username: userDomain.Username,
+		TeamName: userDomain.TeamName,
+		IsActive: userDomain.IsActive,
 	}
 }
 
-func ToPRsShortDtoFromService(prsShort []*serv.PRShort) []response.PRShortResponse {
-	prsDto := make([]response.PRShortResponse, 0, len(prsShort))
-	for _, prShort := range prsShort {
-		prsDto = append(prsDto, ToPRShortDtoFromService(prShort))
+func ToDTOPRsShortFromDomain(PRsShortDomain []*domain.PRShort) []response.PRShortResponse {
+	prsDto := make([]response.PRShortResponse, 0, len(PRsShortDomain))
+	for _, prShort := range PRsShortDomain {
+		prsDto = append(prsDto, ToDTOPRShortFromDomain(prShort))
 	}
 	return prsDto
 }
 
-func ToPRShortDtoFromService(prShort *serv.PRShort) response.PRShortResponse {
+func ToDTOPRShortFromDomain(PRShortDomain *domain.PRShort) response.PRShortResponse {
 	return response.PRShortResponse{
-		PullRequestID:   prShort.ID,
-		PullRequestName: prShort.Name,
-		AuthorID:        prShort.AuthorID,
-		Status:          prShort.Status,
+		PullRequestID:   PRShortDomain.ID,
+		PullRequestName: PRShortDomain.Name,
+		AuthorID:        PRShortDomain.AuthorID,
+		Status:          PRShortDomain.Status,
 	}
 }
 
-func TOStatisticsDtoFromService(stats *serv.Statistics) response.StatisticsResponse {
+func ToDTOStatisticsFromDomain(statsDomain *domain.Statistics) response.StatisticsResponse {
 	teamStats := make(map[string]response.TeamStat)
-	for teamName, stat := range stats.TeamStats {
+	for teamName, stat := range statsDomain.TeamStats {
 		teamStats[teamName] = response.TeamStat{
 			MemberCount:   stat.MemberCount,
 			ActiveMembers: stat.ActiveMembers,
@@ -114,21 +114,21 @@ func TOStatisticsDtoFromService(stats *serv.Statistics) response.StatisticsRespo
 
 	return response.StatisticsResponse{
 		Statistics: response.StatisticsData{
-			TotalPRs:        stats.TotalPRs,
-			OpenPRs:         stats.OpenPRs,
-			MergedPRs:       stats.MergedPRs,
-			UserAssignments: stats.UserAssignments,
-			PRAssignments:   stats.PRAssignments,
+			TotalPRs:        statsDomain.TotalPRs,
+			OpenPRs:         statsDomain.OpenPRs,
+			MergedPRs:       statsDomain.MergedPRs,
+			UserAssignments: statsDomain.UserAssignments,
+			PRAssignments:   statsDomain.PRAssignments,
 			TeamStats:       teamStats,
 		},
 	}
 }
 
-func PRStatusToString(status serv.PRStatus) string {
+func PRStatusToString(status domain.PRStatus) string {
 	switch status {
-	case serv.PRStatusOpen:
+	case domain.PRStatusOpen:
 		return "OPEN"
-	case serv.PRStatusMerged:
+	case domain.PRStatusMerged:
 		return "MERGED"
 	default:
 		return "OPEN"
