@@ -74,6 +74,22 @@ func ToDomainMembersFromEntity(MembersEntity []entity.Member) []domain.Member {
 	return members
 }
 
+func ToDomainUserAssignmentStatsFromEntity(UserAssignmentStatsEntity []*entity.UserAssignmentStatistics) []*domain.UserAssignmentStat {
+	userAssignmentStats := make([]*domain.UserAssignmentStat, len(UserAssignmentStatsEntity))
+	for i, userAssignmentStat := range UserAssignmentStatsEntity {
+		userAssignmentStats[i] = &domain.UserAssignmentStat{
+			UserID:            userAssignmentStat.UserID,
+			Username:          userAssignmentStat.Username,
+			TeamName:          userAssignmentStat.TeamName,
+			TotalAssignments:  userAssignmentStat.TotalAssignments,
+			OpenAssignments:   userAssignmentStat.OpenAssignments,
+			MergedAssignments: userAssignmentStat.MergedAssignments,
+		}
+	}
+
+	return userAssignmentStats
+}
+
 func ToDomainPRStatisticsFromEntity(PRStatisticsEntity *entity.PRStatistics) *domain.PRStatistics {
 	return &domain.PRStatistics{
 		TotalPRs:  PRStatisticsEntity.TotalPRs,
