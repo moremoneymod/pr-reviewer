@@ -11,10 +11,10 @@ import (
 	"github.com/moremoneymod/pr-reviewer/internal/repository"
 	"github.com/moremoneymod/pr-reviewer/internal/repository/converter"
 	"github.com/moremoneymod/pr-reviewer/internal/repository/entity"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/domain"
+	domain "github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
-func (s *Storage) CreateTeam(ctx context.Context, team *serv.Team) (*serv.Team, error) {
+func (s *Storage) CreateTeam(ctx context.Context, team *domain.Team) (*domain.Team, error) {
 	const op = "internal.repository.postgres.team.CreateTeam"
 
 	tx, err := s.pgxPool.Begin(ctx)
@@ -69,7 +69,7 @@ func (s *Storage) CreateTeam(ctx context.Context, team *serv.Team) (*serv.Team, 
 	return team, tx.Commit(ctx)
 }
 
-func (s *Storage) GetTeam(ctx context.Context, teamName string) (*serv.Team, error) {
+func (s *Storage) GetTeam(ctx context.Context, teamName string) (*domain.Team, error) {
 	const op = "internal.repository.postgres.team.GetTeam"
 
 	teamBuilder := sq.Select("id", "name", "created_at").
@@ -109,7 +109,7 @@ func (s *Storage) GetTeam(ctx context.Context, teamName string) (*serv.Team, err
 	return converter.ToDomainTeamFromEntity(&team), nil
 }
 
-func (s *Storage) GetAllTeam(ctx context.Context) ([]*serv.Team, error) {
+func (s *Storage) GetAllTeam(ctx context.Context) ([]*domain.Team, error) {
 	const op = "internal.repository.postgres.team.GetAllTeam"
 
 	builder := sq.Select(
@@ -148,9 +148,9 @@ func (s *Storage) GetAllTeam(ctx context.Context) ([]*serv.Team, error) {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	teams := make([]*serv.Team, len(rows))
+	teams := make([]*domain.Team, len(rows))
 	for i, row := range rows {
-		teams[i] = &serv.Team{
+		teams[i] = &domain.Team{
 			ID:      row.ID,
 			Name:    row.Name,
 			Members: converter.ToDomainMembersFromEntity(row.Members),
@@ -160,7 +160,7 @@ func (s *Storage) GetAllTeam(ctx context.Context) ([]*serv.Team, error) {
 	return teams, nil
 }
 
-func (s *Storage) GetTeamById(ctx context.Context, teamId int) (*serv.Team, error) {
+func (s *Storage) GetTeamById(ctx context.Context, teamId int) (*domain.Team, error) {
 	const op = "internal.repository.postgres.team.GetTeam"
 
 	teamBuilder := sq.Select("id", "name", "created_at").
@@ -198,4 +198,22 @@ func (s *Storage) GetTeamById(ctx context.Context, teamId int) (*serv.Team, erro
 	team.Members = members
 
 	return converter.ToDomainTeamFromEntity(&team), nil
+}
+
+func (s *Storage) GetTeamStatistics(ctx context.Context) (*domain.TeamStatistics, error) {
+	const op = "internal.repository.postgres.team.GetTeamStatistics"
+
+	builder := sq.Select("count(*) as total").From("teams")
+	query, args, err := builder.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	var TeamStatistics entity.TeamStatistics
+	err = pgxscan.Get(ctx, s.pgxPool, &TeamStatistics, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return converter.ToDomainTeamStatisticsFromEntity(&TeamStatistics), nil
 }
