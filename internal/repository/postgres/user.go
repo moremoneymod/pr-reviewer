@@ -155,3 +155,29 @@ func (s *Storage) GetUserStatistics(ctx context.Context) (*domain.UserStatistics
 
 	return converter.ToDomainUserStatisticsFromEntity(&userStatistics), nil
 }
+
+func (s *Storage) GetUserAssignmentStatistics(ctx context.Context) ([]*domain.UserAssignmentStat, error) {
+	const op = "internal.repository.postgres.team.GetUserAssignmentStatistics"
+
+	builder := sq.Select("users.id as user_id, users.username, teams.name as team_name, COUNT(prw.id) as total_assignments, COUNT(CASE WHEN pr.status = 'OPEN' THEN 1 END) as open_assignments, COUNT(CASE WHEN pr.status = 'MERGED' THEN 1 END) as merged_assignments").
+		From("users").
+		LeftJoin("pr_reviewers prw ON users.id = prw.user_id").
+		LeftJoin("pull_requests pr ON prw.pr_id = pr.id").
+		LeftJoin("teams ON users.team_id = teams.id").
+		GroupBy("users.id", "users.username", "teams.name").
+		Having("COUNT(prw.id) > 0").
+		OrderBy("total_assignments DESC")
+
+	query, args, err := builder.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	var userAssignmentsStats []entity.UserAssignmentStatistics
+	err = pgxscan.Select(ctx, s.pgxPool, &userAssignmentsStats, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return converter.ToDomainUserAssignmentStatsFromEntity(userAssignmentsStats), nil
+}
