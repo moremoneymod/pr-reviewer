@@ -17,15 +17,15 @@ func ToDomainPRFromEntity(PREntity *entity.PR) *domain.PR {
 	}
 }
 
-func ToDomainTeamFromEntity(TeamEntity *entity.Team) *domain.Team {
+func ToDomainTeamFromEntity(teamEntity *entity.Team) *domain.Team {
 	team := &domain.Team{
-		ID:   TeamEntity.ID,
-		Name: TeamEntity.Name,
+		ID:   teamEntity.ID,
+		Name: teamEntity.Name,
 	}
 
-	team.Members = make([]domain.Member, len(TeamEntity.Members))
+	team.Members = make([]domain.Member, len(teamEntity.Members))
 
-	for i, member := range TeamEntity.Members {
+	for i, member := range teamEntity.Members {
 		team.Members[i] = ToDomainMemberFromEntity(member)
 	}
 
@@ -55,28 +55,30 @@ func ToDomainPRShortsFromEntity(PRsEntity []*entity.PRShort) []*domain.PRShort {
 	return prShorts
 }
 
-func ToDomainUserFromEntity(UserEntity *entity.User) *domain.User {
+func ToDomainUserFromEntity(userEntity *entity.User) *domain.User {
 	return &domain.User{
-		ID:       UserEntity.ID,
-		Username: UserEntity.Username,
-		TeamID:   UserEntity.TeamID,
-		TeamName: UserEntity.TeamName,
-		IsActive: UserEntity.IsActive,
+		ID:       userEntity.ID,
+		Username: userEntity.Username,
+		TeamID:   userEntity.TeamID,
+		TeamName: userEntity.TeamName,
+		IsActive: userEntity.IsActive,
 	}
 }
 
-func ToDomainMembersFromEntity(MembersEntity []entity.Member) []domain.Member {
-	members := make([]domain.Member, len(MembersEntity))
-	for i, member := range MembersEntity {
+func ToDomainMembersFromEntity(membersEntity []entity.Member) []domain.Member {
+	members := make([]domain.Member, len(membersEntity))
+	for i, member := range membersEntity {
 		members[i] = ToDomainMemberFromEntity(member)
 	}
 
 	return members
 }
 
-func ToDomainUserAssignmentStatsFromEntity(UserAssignmentStatsEntity []entity.UserAssignmentStatistics) []domain.UserAssignmentStat {
-	userAssignmentStats := make([]domain.UserAssignmentStat, len(UserAssignmentStatsEntity))
-	for i, userAssignmentStat := range UserAssignmentStatsEntity {
+func ToDomainUserAssignmentStatsFromEntity(
+	userAssignmentStatsEntity []entity.UserAssignmentStatistics,
+) []domain.UserAssignmentStat {
+	userAssignmentStats := make([]domain.UserAssignmentStat, len(userAssignmentStatsEntity))
+	for i, userAssignmentStat := range userAssignmentStatsEntity {
 		userAssignmentStats[i] = domain.UserAssignmentStat{
 			UserID:            userAssignmentStat.UserID,
 			Username:          userAssignmentStat.Username,
@@ -98,16 +100,20 @@ func ToDomainPRStatisticsFromEntity(PRStatisticsEntity *entity.PRStatistics) *do
 	}
 }
 
-func ToDomainUserStatisticsFromEntity(UserStatisticsEntity *entity.UserStatistics) *domain.UserStatistics {
+func ToDomainUserStatisticsFromEntity(
+	userStatisticsEntity *entity.UserStatistics,
+) *domain.UserStatistics {
 	return &domain.UserStatistics{
-		TotalUsers:  UserStatisticsEntity.TotalUsers,
-		ActiveUsers: UserStatisticsEntity.ActiveUsers,
+		TotalUsers:  userStatisticsEntity.TotalUsers,
+		ActiveUsers: userStatisticsEntity.ActiveUsers,
 	}
 }
 
-func ToDomainTeamStatisticsFromEntity(TeamStatisticsEntity *entity.TeamStatistics) *domain.TeamStatistics {
+func ToDomainTeamStatisticsFromEntity(
+	teamStatisticsEntity *entity.TeamStatistics,
+) *domain.TeamStatistics {
 	return &domain.TeamStatistics{
-		TotalTeams: TeamStatisticsEntity.TotalTeams,
+		TotalTeams: teamStatisticsEntity.TotalTeams,
 	}
 }
 
