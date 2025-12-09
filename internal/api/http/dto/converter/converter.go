@@ -102,9 +102,9 @@ func ToDTOPRShortFromDomain(PRShortDomain *domain.PRShort) response.PRShortRespo
 	}
 }
 
-func ToDTOStatisticsFromDomain(statsDomain *domain.Statistics) response.StatisticsResponse {
+func ToDTOStatisticsFromDomain(statisticsDomain *domain.Statistics) response.StatisticsResponse {
 	teamStats := make(map[string]response.TeamStat)
-	for teamName, stat := range statsDomain.TeamStats {
+	for teamName, stat := range statisticsDomain.TeamStats {
 		teamStats[teamName] = response.TeamStat{
 			MemberCount:   stat.MemberCount,
 			ActiveMembers: stat.ActiveMembers,
@@ -114,11 +114,11 @@ func ToDTOStatisticsFromDomain(statsDomain *domain.Statistics) response.Statisti
 
 	return response.StatisticsResponse{
 		Statistics: response.StatisticsData{
-			TotalPRs:        statsDomain.TotalPRs,
-			OpenPRs:         statsDomain.OpenPRs,
-			MergedPRs:       statsDomain.MergedPRs,
-			UserAssignments: statsDomain.UserAssignments,
-			PRAssignments:   statsDomain.PRAssignments,
+			TotalPRs:        statisticsDomain.TotalPRs,
+			OpenPRs:         statisticsDomain.OpenPRs,
+			MergedPRs:       statisticsDomain.MergedPRs,
+			UserAssignments: statisticsDomain.UserAssignments,
+			PRAssignments:   statisticsDomain.PRAssignments,
 			TeamStats:       teamStats,
 		},
 	}
