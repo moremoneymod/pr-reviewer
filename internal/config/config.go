@@ -18,7 +18,7 @@ func Load(path string) error {
 
 func MustLoad() *Config {
 
-	err := Load(".env")
+	err := Load(".env.example")
 	if err != nil {
 		panic(err)
 	}
