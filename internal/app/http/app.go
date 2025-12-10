@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/moremoneymod/pr-reviewer/internal/api/http/handlers/health"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/handlers/pullrequest/create"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/handlers/pullrequest/merge"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/handlers/pullrequest/reassign"
@@ -80,6 +81,7 @@ func setupRouter(log *slog.Logger, service *service.Service) *chi.Mux {
 		r.Post("/setIsActive", set_active.New(log, service))
 		r.Get("/getReview", get_review.New(log, service))
 	})
+	router.Get("/health", health.New(log))
 	router.Get("/statistics", statistic.New(log, service))
 	return router
 }
