@@ -16,7 +16,7 @@ const (
 )
 
 func main() {
-	cfg := config.MustLoad()
+	cfg := config.MustLoad("env.example")
 
 	log := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	ctx, cancel := context.WithCancel(context.Background())
