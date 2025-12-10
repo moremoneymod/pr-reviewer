@@ -8,10 +8,10 @@ import (
 
 	"github.com/moremoneymod/pr-reviewer/internal/lib/logger/sl"
 	"github.com/moremoneymod/pr-reviewer/internal/repository"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/domain"
+	"github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
-func (s *Service) SetIsActive(ctx context.Context, userId string, isActive bool) (*serv.User, error) {
+func (s *Service) SetIsActive(ctx context.Context, userId string, isActive bool) (*domain.User, error) {
 	const op = "internal.service.user.SetIsActive"
 
 	log := s.log.With(
@@ -33,7 +33,7 @@ func (s *Service) SetIsActive(ctx context.Context, userId string, isActive bool)
 	return user, nil
 }
 
-func (s *Service) GetReview(ctx context.Context, userId string) ([]*serv.PRShort, error) {
+func (s *Service) GetReview(ctx context.Context, userId string) ([]*domain.PRShort, error) {
 	const op = "internal.service.getReview"
 
 	log := s.log.With(

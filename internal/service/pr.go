@@ -9,10 +9,10 @@ import (
 
 	"github.com/moremoneymod/pr-reviewer/internal/lib/logger/sl"
 	"github.com/moremoneymod/pr-reviewer/internal/repository"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/domain"
+	"github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
-func (s *Service) CreatePR(ctx context.Context, prId string, prName string, authorId string) (*serv.PR, error) {
+func (s *Service) CreatePR(ctx context.Context, prId string, prName string, authorId string) (*domain.PR, error) {
 	const op = "internal.service.pr.CreatePR"
 
 	log := s.log.With(
@@ -48,11 +48,11 @@ func (s *Service) CreatePR(ctx context.Context, prId string, prName string, auth
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	pr := serv.PR{
+	pr := domain.PR{
 		ID:        prId,
 		Name:      prName,
 		AuthorID:  authorId,
-		Status:    serv.PRStatusOpen,
+		Status:    domain.PRStatusOpen,
 		Reviewers: reviewers,
 	}
 
@@ -71,7 +71,7 @@ func (s *Service) CreatePR(ctx context.Context, prId string, prName string, auth
 	return prEntity, nil
 }
 
-func (s *Service) Merge(ctx context.Context, prId string) (*serv.PR, error) {
+func (s *Service) Merge(ctx context.Context, prId string) (*domain.PR, error) {
 	const op = "internal.service.pr.Merge"
 
 	log := s.log.With(
@@ -94,7 +94,7 @@ func (s *Service) Merge(ctx context.Context, prId string) (*serv.PR, error) {
 
 }
 
-func (s *Service) Reassign(ctx context.Context, prId string, oldUserId string) (*serv.PR, error) {
+func (s *Service) Reassign(ctx context.Context, prId string, oldUserId string) (*domain.PR, error) {
 	const op = "internal.service.pr.Reassign"
 
 	log := s.log.With(
@@ -112,7 +112,7 @@ func (s *Service) Reassign(ctx context.Context, prId string, oldUserId string) (
 		log.Error("failed to get pr", sl.Err(err))
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
-	if pr.Status == serv.PRStatusMerged {
+	if pr.Status == domain.PRStatusMerged {
 		log.Warn("pr is already merged")
 		return nil, fmt.Errorf("%s: %w", op, ErrPRMerged)
 	}
@@ -128,7 +128,6 @@ func (s *Service) Reassign(ctx context.Context, prId string, oldUserId string) (
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	fmt.Println(pr.Reviewers)
 	if !slices.Contains(pr.Reviewers, oldUserId) {
 		log.Warn("user is not reviewer")
 		return nil, fmt.Errorf("%s: %w", op, ErrUserNotReviewer)
@@ -138,7 +137,6 @@ func (s *Service) Reassign(ctx context.Context, prId string, oldUserId string) (
 	excludeIds := pr.Reviewers
 	excludeIds = append(excludeIds, pr.AuthorID)
 	reviewerCandidates, err := s.UserProvider.GetReviewers(ctx, oldUser.TeamID, excludeIds, 1)
-	fmt.Println(reviewerCandidates)
 	if err != nil {
 		log.Error("failed to get reviewer candidates", sl.Err(err))
 		return nil, fmt.Errorf("%s: %w", op, err)

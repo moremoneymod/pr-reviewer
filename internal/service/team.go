@@ -8,10 +8,10 @@ import (
 
 	"github.com/moremoneymod/pr-reviewer/internal/lib/logger/sl"
 	"github.com/moremoneymod/pr-reviewer/internal/repository"
-	serv "github.com/moremoneymod/pr-reviewer/internal/service/domain"
+	"github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
-func (s *Service) Create(ctx context.Context, team *serv.Team) (*serv.Team, error) {
+func (s *Service) Create(ctx context.Context, team *domain.Team) (*domain.Team, error) {
 	const op = "internal.service.team.Create"
 
 	log := s.log.With(
@@ -33,7 +33,7 @@ func (s *Service) Create(ctx context.Context, team *serv.Team) (*serv.Team, erro
 	return teamEntity, nil
 }
 
-func (s *Service) Get(ctx context.Context, teamName string) (*serv.Team, error) {
+func (s *Service) Get(ctx context.Context, teamName string) (*domain.Team, error) {
 	const op = "internal.service.team.Get"
 
 	log := s.log.With(
