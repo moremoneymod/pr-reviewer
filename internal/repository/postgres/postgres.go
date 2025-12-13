@@ -19,3 +19,9 @@ func New(ctx context.Context, pgConfig string) (*Storage, error) {
 	}
 	return &Storage{dbc}, nil
 }
+
+func (s *Storage) Close() {
+	if s.pgxPool != nil {
+		s.pgxPool.Close()
+	}
+}
