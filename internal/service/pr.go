@@ -22,7 +22,7 @@ func (s *Service) CreatePR(ctx context.Context, prId string, prName string, auth
 	log.Info("attempting to get user")
 	author, err := s.UserProvider.GetUser(ctx, authorId)
 	if errors.Is(err, repository.ErrUserNotFound) {
-		log.Info("user not found")
+		log.Info("author not found")
 		return nil, fmt.Errorf("%s: %w", op, ErrUserNotFound)
 	}
 	if err != nil {
@@ -99,7 +99,8 @@ func (s *Service) Reassign(ctx context.Context, prId string, oldUserId string) (
 
 	log := s.log.With(
 		slog.String("op", op),
-		slog.String("prId", prId))
+		slog.String("prId", prId),
+		slog.String("oldUserId", oldUserId))
 
 	log.Info("attempting to reassign pr")
 	log.Info("attempting to get pr")
