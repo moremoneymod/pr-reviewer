@@ -9,12 +9,13 @@ import (
 	"net/http"
 
 	"github.com/go-chi/render"
+	"github.com/go-playground/validator/v10"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/converter"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/request"
 	apiErrors "github.com/moremoneymod/pr-reviewer/internal/errors"
 	"github.com/moremoneymod/pr-reviewer/internal/lib/logger/sl"
 	"github.com/moremoneymod/pr-reviewer/internal/service"
-	domain "github.com/moremoneymod/pr-reviewer/internal/service/domain"
+	"github.com/moremoneymod/pr-reviewer/internal/service/domain"
 )
 
 type TeamAdder interface {
@@ -38,20 +39,32 @@ func New(log *slog.Logger, teamAdder TeamAdder) http.HandlerFunc {
 			return
 		}
 
+		if err := validator.New().Struct(req); err != nil {
+			validateErr := err.(validator.ValidationErrors)
+
+			log.Error("invalid request", sl.Err(err))
+
+			render.Status(r, http.StatusBadRequest)
+			render.JSON(w, r, apiErrors.ValidationError(validateErr))
+
+			return
+		}
+
 		log = log.With(slog.String("teamName", req.TeamName))
 
 		team := converter.ToDomainTeamFromDTO(req)
 
-		createdTeam, err := teamAdder.Create(context.Background(), team)
+		createdTeam, err := teamAdder.Create(r.Context(), team)
 		if errors.Is(err, service.ErrTeamExists) {
 			log.Info("team already exists")
-			render.Status(r, http.StatusConflict)
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeTeamExists, fmt.Sprintf("%s already exists", team.Name)))
 
 			return
 		}
 		if err != nil {
 			log.Error("internal error", sl.Err(err))
+
 			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, apiErrors.NewErrorResponse(apiErrors.ErrorCodeInternalServer, "internal server error"))
 

@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/render"
+	"github.com/go-playground/validator/v10"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/converter"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/request"
 	apiErrors "github.com/moremoneymod/pr-reviewer/internal/errors"
@@ -38,6 +39,17 @@ func New(log *slog.Logger, userActivitySetter UserActivityChanger) http.HandlerF
 		}
 
 		log = log.With(slog.String("userId", req.UserID))
+
+		if err := validator.New().Struct(req); err != nil {
+			validateErr := err.(validator.ValidationErrors)
+
+			log.Error("invalid request", sl.Err(err))
+
+			render.Status(r, http.StatusBadRequest)
+			render.JSON(w, r, apiErrors.ValidationError(validateErr))
+
+			return
+		}
 
 		updatedUser, err := userActivitySetter.SetIsActive(r.Context(), req.UserID, req.IsActive)
 		if errors.Is(err, service.ErrUserNotFound) {

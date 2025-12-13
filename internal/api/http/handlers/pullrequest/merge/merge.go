@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/render"
+	"github.com/go-playground/validator/v10"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/converter"
 	"github.com/moremoneymod/pr-reviewer/internal/api/http/dto/request"
 	apiErrors "github.com/moremoneymod/pr-reviewer/internal/errors"
@@ -39,6 +40,17 @@ func New(log *slog.Logger, prMerger PRMerger) http.HandlerFunc {
 
 		log = log.With(
 			slog.String("prId", req.PullRequestID))
+
+		if err := validator.New().Struct(req); err != nil {
+			validateErr := err.(validator.ValidationErrors)
+
+			log.Error("invalid request", sl.Err(err))
+
+			render.Status(r, http.StatusBadRequest)
+			render.JSON(w, r, apiErrors.ValidationError(validateErr))
+
+			return
+		}
 
 		mergedPR, err := prMerger.Merge(r.Context(), req.PullRequestID)
 		if errors.Is(err, service.ErrPRNotFound) {
