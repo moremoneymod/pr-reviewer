@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/georgysavva/scany/v2/pgxscan"
@@ -122,65 +121,6 @@ func (s *Storage) Get(ctx context.Context, prId string) (*domain.PR, error) {
 	return converter.ToDomainPRFromEntity(&pr), nil
 }
 
-func (s *Storage) GetAllPR(ctx context.Context) ([]*domain.PR, error) {
-	const op = "internal.repository.postgres.postgres.GetAllPR"
-
-	// Используем CTE для получения reviewers
-	builder := sq.Select(
-		"p.id",
-		"p.name",
-		"p.author_id",
-		"p.status",
-		"p.created_at",
-		"p.merged_at",
-		`(
-				SELECT array_agg(user_id) 
-				FROM pr_reviewers pr 
-				WHERE pr.pr_id = p.id
-			) as reviewers`,
-	).
-		PlaceholderFormat(sq.Dollar).
-		From("pull_requests p").
-		OrderBy("p.created_at DESC")
-
-	query, args, err := builder.ToSql()
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", op, err)
-	}
-
-	type prRow struct {
-		ID        string     `db:"id"`
-		Name      string     `db:"name"`
-		AuthorID  string     `db:"author_id"`
-		Status    string     `db:"status"`
-		CreatedAt time.Time  `db:"created_at"`
-		MergedAt  *time.Time `db:"merged_at"`
-		Reviewers []string   `db:"reviewers"`
-	}
-
-	var rows []prRow
-	err = pgxscan.Select(ctx, s.pgxPool, &rows, query, args...)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", op, err)
-	}
-
-	prs := make([]*domain.PR, len(rows))
-	for i, row := range rows {
-
-		prs[i] = &domain.PR{
-			ID:        row.ID,
-			Name:      row.Name,
-			AuthorID:  row.AuthorID,
-			Status:    converter.StringToPRStatus(row.Status),
-			Reviewers: row.Reviewers,
-			CreatedAt: &row.CreatedAt,
-			MergedAt:  row.MergedAt,
-		}
-	}
-
-	return prs, nil
-}
-
 func (s *Storage) Merge(ctx context.Context, prId string) (*domain.PR, error) {
 	const op = "internal.repository.postgres.postgres.Merge"
 
@@ -247,6 +187,9 @@ func (s *Storage) GetPRStatistics(ctx context.Context) (*domain.PRStatistics, er
 
 	var pullRequestsStats entity.PRStatistics
 	err = pgxscan.Select(ctx, s.pgxPool, &pullRequestsStats, query, args...)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, repository.ErrStatisticsNotFound
+	}
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}

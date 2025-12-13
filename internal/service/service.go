@@ -24,7 +24,6 @@ type PRProvider interface {
 	Get(ctx context.Context, prId string) (*domain.PR, error)
 	Merge(ctx context.Context, prId string) (*domain.PR, error)
 	GetPullRequestsIdsByReviewer(ctx context.Context, reviewerId string) ([]string, error)
-	GetAllPR(ctx context.Context) ([]*domain.PR, error)
 	GetPRStatistics(ctx context.Context) (*domain.PRStatistics, error)
 }
 
