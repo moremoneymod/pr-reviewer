@@ -64,7 +64,7 @@ func (app *App) Run() error {
 	log := app.log.With(
 		slog.String("op", op))
 
-	if err := app.httpServer.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {
+	if err := app.httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Error("failed to start http server", sl.Err(err))
 		return err
 	}
