@@ -11,7 +11,8 @@ import (
 )
 
 type App struct {
-	HTTPSrv *http.App
+	HTTPSrv    *http.App
+	repository *postgres.Storage
 }
 
 func New(ctx context.Context, log *slog.Logger, pgConfig string, httpConfig config.HTTPConfig) *App {
@@ -24,6 +25,16 @@ func New(ctx context.Context, log *slog.Logger, pgConfig string, httpConfig conf
 	httpApp := http.New(log, httpConfig, appService)
 
 	return &App{
-		HTTPSrv: httpApp,
+		HTTPSrv:    httpApp,
+		repository: repository,
 	}
+}
+
+func (app *App) Stop(ctx context.Context) error {
+	err := app.HTTPSrv.Stop(ctx)
+	if err != nil {
+		return err
+	}
+	app.repository.Close()
+	return nil
 }
