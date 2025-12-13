@@ -1,6 +1,8 @@
 package http
 
 import (
+	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -50,23 +52,27 @@ func (app *App) MustRun() {
 	}
 }
 
+func (app *App) Stop(ctx context.Context) error {
+	err := app.httpServer.Shutdown(ctx)
+	app.log.Info("Shutting down http server")
+	return err
+}
+
 func (app *App) Run() error {
 	const op = "internal.app.http.Run"
 
 	log := app.log.With(
 		slog.String("op", op))
 
-	if err := app.httpServer.ListenAndServe(); err != nil {
+	if err := app.httpServer.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {
 		log.Error("failed to start http server", sl.Err(err))
 		return err
 	}
-	log.Error("stopped http server")
+	log.Info("stopped http server")
 	return nil
 }
 
 func setupRouter(log *slog.Logger, service *service.Service) *chi.Mux {
-	const op = "internal.app.http.setupRouter"
-
 	router := chi.NewRouter()
 	router.Route("/pullRequest", func(r chi.Router) {
 		r.Post("/create", create.New(log, service))
