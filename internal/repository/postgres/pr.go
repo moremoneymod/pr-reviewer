@@ -2,11 +2,13 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/georgysavva/scany/v2/pgxscan"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/moremoneymod/pr-reviewer/internal/repository"
 	"github.com/moremoneymod/pr-reviewer/internal/repository/converter"
@@ -94,6 +96,9 @@ func (s *Storage) Get(ctx context.Context, prId string) (*domain.PR, error) {
 
 	var pr entity.PR
 	err = pgxscan.Get(ctx, s.pgxPool, &pr, query, args...)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, repository.ErrPRNotFound
+	}
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
@@ -114,7 +119,6 @@ func (s *Storage) Get(ctx context.Context, prId string) (*domain.PR, error) {
 	}
 
 	pr.Reviewers = reviewers
-
 	return converter.ToDomainPRFromEntity(&pr), nil
 }
 
@@ -187,12 +191,12 @@ func (s *Storage) Merge(ctx context.Context, prId string) (*domain.PR, error) {
 		Where(sq.Eq{"id": prId})
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("%s%w", op, err)
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
 	result, err := s.pgxPool.Exec(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("%s%w", op, err)
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
 	if result.RowsAffected() == 0 {
@@ -201,7 +205,7 @@ func (s *Storage) Merge(ctx context.Context, prId string) (*domain.PR, error) {
 
 	pr, err := s.Get(ctx, prId)
 	if err != nil {
-		return nil, fmt.Errorf("%s%w", op, err)
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
 	return pr, nil
